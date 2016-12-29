@@ -17,7 +17,6 @@
     },
     "workspaceId": {
       "type": "string",
-      "defaultValue": "f9ca4cef-5a9e-4286-be8f-176223f86cb2",
       "metadata": {
         "description": "OMS workspace ID"
       }
@@ -25,7 +24,7 @@
     "workspaceName": {
       "type": "string",
       "metadata": {
-         "description": "OMD workspace name"
+         "description": "OMS workspace name"
       }
     },
     "vmNamePrefix": {
@@ -49,20 +48,17 @@
     },
     "existingVNETResourceGroup": {
       "type": "string",
-      "defaultValue": "BC",
       "metadata": {
          "description": "Resource group where existing VNET exists."
       }
     },
     "existingVNET": {
       "type": "string",
-      "defaultValue": "BC-VNET",
       "metadata": {
          "description": "Name of existing VNET where the VMs will be deployed."
       }
     },
     "existingSubnet": {
-        "defaultValue": "failover",
       "type": "string",
       "metadata": {
          "description": "Name of the subnet in the existing VNET where the VMs will be deployed."
