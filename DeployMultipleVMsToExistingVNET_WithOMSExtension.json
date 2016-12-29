@@ -1,0 +1,242 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "defaultValue": "f9ca4cef-5a9e-4286-be8f-176223f86cb2",
+      "metadata": {
+        "description": "OMS workspace ID"
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+         "description": "OMD workspace name"
+      }
+    },
+    "vmNamePrefix": {
+      "type": "string",
+      "metadata": {
+         "description": "VM Name prefix"
+      }
+    },
+    "windowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, Windows-Server-Technical-Preview."
+      }
+    },
+    "existingVNETResourceGroup": {
+      "type": "string",
+      "defaultValue": "BC",
+      "metadata": {
+         "description": "Resource group where existing VNET exists."
+      }
+    },
+    "existingVNET": {
+      "type": "string",
+      "defaultValue": "BC-VNET",
+      "metadata": {
+         "description": "Name of existing VNET where the VMs will be deployed."
+      }
+    },
+    "existingSubnet": {
+        "defaultValue": "failover",
+      "type": "string",
+      "metadata": {
+         "description": "Name of the subnet in the existing VNET where the VMs will be deployed."
+      }
+    },
+    "numberOfVMs": {
+      "type": "int",
+      "metadata": {
+         "description": "Number of VMs to be deployed."
+      }
+    }
+  },
+
+  "variables": {
+    "vnetID": "[resourceId(parameters('existingVNETResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNET'))]", 
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('existingSubnet'))]", 
+    "location": "[resourceGroup().location]",
+    "storageAccountName": "omstesting",
+    "apiVersion": "2015-06-15",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "addressPrefix": "10.2.0.0/16",
+    "subnetPrefix": "10.2.0.0/24",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressType": "Dynamic",
+    "vmSize": "Standard_DS1"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "accountType": "[variables('storageAccountType')]"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[concat(parameters('vmNamePrefix'),copyIndex(),'-PublicIP')]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name":"publicIPAddressCopy",
+        "count":"[parameters('numberOfVMs')]"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('vmNamePrefix'),copyIndex())]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('vmNamePrefix'), copyindex(),'-NIC')]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "nicCopy",
+        "count": "[parameters('numberOfVMs')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('vmNamePrefix'),copyIndex(),'-PublicIP')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses/',concat(parameters('vmNamePrefix'),copyIndex(),'-PublicIP'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('vmNamePrefix'),copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "vmCopy",
+        "count": "[parameters('numberOfVMs')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/',parameters('vmNamePrefix'),copyIndex(),'-NIC')]",
+        "[concat('Microsoft.Network/publicIPAddresses/',parameters('vmNamePrefix'),copyIndex(),'-PublicIP')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computername": "[concat(parameters('vmNamePrefix'),copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('vmNamePrefix'),copyIndex(),'-osDisk')]",
+            "vhd": {
+              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/vhds/',parameters('vmNamePrefix'),copyIndex(),'-osDisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            { 
+              "name":"[concat(parameters('vmNamePrefix'),copyIndex(),'-networkProfile')]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/',concat(parameters('vmNamePrefix'),copyIndex(),'-NIC'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+             "enabled": "true",
+             "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "Microsoft.EnterpriseCloud.Monitoring",
+          "apiVersion": "[variables('apiVersion')]",
+          "location": "[variables('location')]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/',parameters('vmNamePrefix'),copyIndex())]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+            "type": "MicrosoftMonitoringAgent",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "workspaceId": "[parameters('workspaceId')]"
+            },
+            "protectedSettings": {
+              "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2015-03-20').primarySharedKey]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+      "sharedKeyOutput": {
+         "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2015-03-20').primarySharedKey]",
+         "type": "string"
+      },
+      "workspaceIdOutput": {
+         "value": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2015-03-20').customerId]",
+        "type" : "string"
+      }
+  }
+}
+
+
+
+
+
+
