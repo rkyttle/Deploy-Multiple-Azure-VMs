@@ -6,11 +6,15 @@ DeployMultipleVMs_WithOMSExtension - This template deploys x VMs to Azure based 
 
 DeployMultipleVMsToExistingVNET_WithOMSExtension - Same logic but adds code to deploy VMs to an existing VNET in another resource group rather than creating a new VNET or being forced to deploy to a VNET in the specified resource group.
 
-To deploy the template using PowerShell: Login-AzureRmAccount 
+To deploy the template using PowerShell: 
+
+Login-AzureRmAccount 
 Select-AzureRmSubscription -SubscriptionName '<subscription name>'
 
 $ResourceGroupName='<resource group name>' #This is the resource group where the VMs and other resources specified will be deployed
 $TemplateFilePath='<local path to template>'
-$TemplateUri='https://raw.githubusercontent.com/<external path to template using github>'
+$TemplateUri='https://raw.githubusercontent.com/shawntierney/justtesting/master/DeployMultipleVMs_WithOMSExtension.json'
 
 New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateUri $TemplateUri 
+
+Use the following link for help deploying templates: https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-deploy
