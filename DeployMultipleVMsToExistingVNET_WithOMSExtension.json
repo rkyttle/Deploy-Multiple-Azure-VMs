@@ -76,7 +76,7 @@
     "vnetID": "[resourceId(parameters('existingVNETResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNET'))]", 
     "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('existingSubnet'))]", 
     "location": "[resourceGroup().location]",
-    "storageAccountName": "omstesting",
+    "storageAccountName": "multiplevmstest",
     "apiVersion": "2015-06-15",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
