@@ -5,8 +5,8 @@ To deploy the template using PowerShell:
 Login-AzureRmAccount 
 Select-AzureRmSubscription -SubscriptionName '<subscription name>'
 
-$ResourceGroupName="<resource group name>" #This is the resource group where the VMs and other resources specified will be deployed
-$TemplateFilePath="<local path to template>"
+$ResourceGroupName=<resource group name> #This is the resource group where the VMs and other resources specified will be deployed
+$TemplateFilePath=<local path to template>
 $TemplateUri='https://raw.githubusercontent.com/shawntierney/Deploy-Multiple-Azure-VMs-with-OMS-Extension/master/DeployMultipleVMs_OMSExtension_ExistingVNET_NoDefault.json'
 
 New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateUri $TemplateUri 
