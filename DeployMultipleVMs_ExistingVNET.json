@@ -76,7 +76,7 @@
     "vnetID": "[resourceId(parameters('vnetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]"
   },
-  "resources": [
+  "resources": {
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('storageAccountName')]",
@@ -185,5 +185,5 @@
         }
       }
     }
-      ]
+  }
 }
