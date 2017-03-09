@@ -88,7 +88,7 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(),'-PublicIP')]",
+      "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1),'-PublicIP')]",
       "location": "[variables('location')]",
       "copy": {
         "name":"publicIPAddressCopy",
@@ -97,21 +97,21 @@
       "properties": {
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
         "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex())]"
+          "domainNameLabel": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1))]"
         }
       }
     },
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('vmNamePrefix'),'vm-',copyindex(),'-NIC')]",
+      "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1),'-NIC')]",
       "location": "[variables('location')]",
       "copy": {
         "name": "nicCopy",
         "count": "[parameters('numberOfInstances')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', parameters('vmNamePrefix'),'vm-',copyIndex(),'-PublicIP')]"
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('vmNamePrefix'),'vm-',copyIndex(1),'-PublicIP')]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -120,7 +120,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses/',concat(parameters('vmNamePrefix'),'vm-',copyIndex(),'-PublicIP'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses/',concat(parameters('vmNamePrefix'),'vm-',copyIndex(1),'-PublicIP'))]"
               },
               "subnet": {
                 "id": "[variables('subnetRef')]"
@@ -133,22 +133,22 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex())]",
+      "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1))]",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "vmCopy",
         "count": "[parameters('numberOfInstances')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/',parameters('vmNamePrefix'),'vm-',copyIndex(),'-NIC')]",
-        "[concat('Microsoft.Network/publicIPAddresses/',parameters('vmNamePrefix'),'vm-',copyIndex(),'-PublicIP')]"
+        "[concat('Microsoft.Network/networkInterfaces/',parameters('vmNamePrefix'),'vm-',copyIndex(1),'-NIC')]",
+        "[concat('Microsoft.Network/publicIPAddresses/',parameters('vmNamePrefix'),'vm-',copyIndex(1),'-PublicIP')]"
       ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex())]",
+          "computerName": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1))]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -160,9 +160,9 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(),'-osDisk')]",
+            "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1),'-osDisk')]",
             "vhd": {
-              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/vhds/',parameters('vmNamePrefix'),'vm-',copyIndex(),'-osDisk.vhd')]"
+              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/vhds/',parameters('vmNamePrefix'),'vm-',copyIndex(1),'-osDisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -171,8 +171,8 @@
         "networkProfile": {
           "networkInterfaces": [
             { 
-              "name":"[concat(parameters('vmNamePrefix'),'vm-',copyIndex(),'-networkProfile')]",
-              "id": "[resourceId('Microsoft.Network/networkInterfaces/',concat(parameters('vmNamePrefix'),'vm-',copyIndex(),'-NIC'))]"
+              "name":"[concat(parameters('vmNamePrefix'),'vm-',copyIndex(1),'-networkProfile')]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/',concat(parameters('vmNamePrefix'),'vm-',copyIndex(1),'-NIC'))]"
             }
           ]
         },
