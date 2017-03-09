@@ -67,7 +67,6 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "apiVersion": "2015-06-15",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "storageAccountType": "Standard_LRS",
@@ -80,14 +79,14 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('storageAccountName')]",
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex(),'-PublicIP')]",
       "location": "[variables('location')]",
@@ -103,7 +102,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(parameters('vmNamePrefix'),'vm-',copyindex(),'-NIC')]",
       "location": "[variables('location')]",
@@ -149,7 +148,7 @@
           "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computername": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex())]",
+          "computerName": "[concat(parameters('vmNamePrefix'),'vm-',copyIndex())]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
