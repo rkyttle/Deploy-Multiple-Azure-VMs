@@ -101,19 +101,17 @@
     },
     "ModuleURL": {
       "type": "string",
-      "defaultValue": "https://github.com/krjhitch/DSCartifacts/raw/master/packages/adlab.zip"
+      "defaultValue": "https://github.com/rkyttle/Deploy-Multiple-Azure-VMs/raw/master/packages/securevm.zip"
     },
     "PS1": {
       "type": "string",
-      "defaultValue": "adlab.ps1"
+      "defaultValue": "securevm.ps1"
     },
     "DSCfunction": {
       "type": "string",
-      "defaultValue": "adlab",
+      "defaultValue": "securevm",
       "allowedValues": [
-        "CreateFirstDC",
-        "AddAdditionalDC",
-        "JoinAD"
+        "securevm"
       ]
     }
   },
@@ -276,14 +274,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "ModulesUrl": "[parameters('ModuleURL')]",
-          "ConfigurationFunction": "[concat(parameters('PS1'), '\\', parameters('DSCfunction'))]",
-          "Properties": {
-            "DomainName": "[parameters('domainToJoin')]",
-            "AdminCreds": {
-              "UserName": "[parameters('domainUsername')]",
-              "Password": "[parameters('domainPassword')]"
-            }
-          }
+          "ConfigurationFunction": "[concat(parameters('PS1'), '\\', parameters('DSCfunction'))]"
         }
       }
     }
